@@ -1,0 +1,26 @@
+TASK 4 - VALIDATION EVIDENCE
+Mon Nov 23 12:20:27 UTC 2026
+
+========== eSim ==========
+bash syntax: PASS
+ShellCheck: PASS
+Git diff check: PASS
+commit 694a087b495e7e965b9e4dccd24f61fe9da40131
+Author:     Poonam Gupta <nityag606@gmail.com>
+AuthorDate: Mon Nov 23 12:10:09 2026 +0000
+Commit:     Poonam Gupta <nityag606@gmail.com>
+CommitDate: Mon Nov 23 12:10:09 2026 +0000
+
+    Fix Ubuntu 25.04 eSim installer detection and dispatch
+
+========== NGHDL ==========
+bash syntax: PASS
+ShellCheck: PASS
+Git diff check: PASS
+commit 5067f905d95c2fb4c5f24396c896ee92bdb423a6
+Author:     Poonam Gupta <nityag606@gmail.com>
+AuthorDate: Mon Nov 23 12:10:17 2026 +0000
+Commit:     Poonam Gupta <nityag606@gmail.com>
+CommitDate: Mon Nov 23 12:10:17 2026 +0000
+
+    Fix LLVM and Clang compatibility on Ubuntu 25.04
