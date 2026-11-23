@@ -22,17 +22,35 @@
 
 # Function to detect Ubuntu version and full version string
 get_ubuntu_version() {
-    VERSION_ID=$(grep "^VERSION_ID" /etc/os-release | cut -d '"' -f 2)
-    FULL_VERSION=$(lsb_release -d | grep -oP '\d+\.\d+\.\d+')
-    echo "Detected Ubuntu Version: $FULL_VERSION"
+    if [[ ! -r /etc/os-release ]]; then
+        echo "Cannot detect OS: /etc/os-release is unavailable." >&2
+        return 1
+    fi
+
+    . /etc/os-release
+
+    if [[ "${ID:-}" != "ubuntu" ]]; then
+        echo "Unsupported operating system: ${PRETTY_NAME:-unknown}" >&2
+        return 1
+    fi
+
+    VERSION_ID="${VERSION_ID:-}"
+    FULL_VERSION="${VERSION:-$VERSION_ID}"
+    FULL_VERSION="${FULL_VERSION%% *}"
+
+    if [[ -z "$VERSION_ID" ]]; then
+        echo "Unable to determine Ubuntu VERSION_ID." >&2
+        return 1
+    fi
+
+    echo "Detected Ubuntu Version: $VERSION_ID"
 }
 
 # Function to choose and run the appropriate script
 run_version_script() {
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/install-eSim-scripts"
-    
-    # Decide script based on full version
-    case $VERSION_ID in
+
+    case "$VERSION_ID" in
         "22.04")
             if [[ "$FULL_VERSION" == "22.04.4" ]]; then
                 SCRIPT="$SCRIPT_DIR/install-eSim-22.04.sh"
@@ -50,23 +68,18 @@ run_version_script() {
             SCRIPT="$SCRIPT_DIR/install-eSim-25.04.sh"
             ;;
         *)
-            echo "Unsupported Ubuntu version: $VERSION_ID ($FULL_VERSION)"
-            exit 1
+            echo "Unsupported Ubuntu version: $VERSION_ID ($FULL_VERSION)" >&2
+            return 1
             ;;
     esac
 
-    # Run the script if found
-    if [[ -f "$SCRIPT" ]]; then
-        echo "Running script: $SCRIPT $ARGUMENT"
-        bash "$SCRIPT" "$ARGUMENT"
-    echo "[eSim]" >> $config_dir/$config_file
-    echo "eSim_HOME = $eSim_Home" >> $config_dir/$config_file
-    echo "LICENSE = %(eSim_HOME)s/LICENSE" >> $config_dir/$config_file
-    echo "KicadLib = %(eSim_HOME)s/library/kicadLibrary.tar.xz" >> $config_dir/$config_file
-    echo "IMAGES = %(eSim_HOME)s/images" >> $config_dir/$config_file
-    echo "VERSION = %(eSim_HOME)s/VERSION" >> $config_dir/$config_file
-    echo "MODELICA_MAP_JSON = %(eSim_HOME)s/library/ngspicetoModelica/Mapping.json" >> $config_dir/$config_file
-   
+    if [[ ! -f "$SCRIPT" ]]; then
+        echo "Installer script not found: $SCRIPT" >&2
+        return 1
+    fi
+
+    echo "Running script: $SCRIPT $ARGUMENT"
+    bash "$SCRIPT" "$ARGUMENT"
 }
 
 
